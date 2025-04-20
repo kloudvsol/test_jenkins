@@ -1,0 +1,81 @@
+pipeline { 
+
+    environment { 
+
+        registry = "myawspk/myrepo" 
+
+        registryCredential = 'dockerhub_id' 
+
+        dockerImage = '' 
+
+    }
+
+    agent any 
+
+    stages { 
+
+        stage('Cloning our Git') { 
+
+            steps { 
+
+                git url: 'https://github.com/mycloudazure/test_jenkins.git', branch: 'main',
+                credentialsId: 'github_creds'
+		
+            }
+
+        } 
+
+        stage('Building our image') { 
+
+            steps { 
+
+                script { 
+
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    dockerImage = docker.build registry + ":latest"
+                }
+
+            } 
+
+        }
+
+        stage('push our image') { 
+
+            steps { 
+
+                script { 
+
+                    docker.withRegistry( '', registryCredential ) { 
+
+                        dockerImage.push() 
+
+                    }
+
+                } 
+
+            }
+
+        } 
+
+        stage('deployment-on-k8s') { 
+
+            steps { 
+
+                sh "docker rmi $registry:$BUILD_NUMBER" 
+			    git url: 'https://github.com/mycloudazure/test_jenkins.git', branch: 'main',
+                credentialsId: 'github_creds'
+                // Start-K8s-Pod-deploymnet
+				sh " echo  Start-K8s-Pod-deploymnet "
+                sh "kubectl delete -f pod.yaml"
+                sh "Kubectl apply -f  pod.yaml"
+                sh "kubectl get pods -o wide"
+                sh "kubectl apply -f service.yaml"
+                sh "Kubectl get svc" 
+
+            }
+
+        } 
+
+    }
+
+}
