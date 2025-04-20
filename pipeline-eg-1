@@ -1,0 +1,33 @@
+# Here's an example Jenkins Pipeline script using Groovy. This script demonstrates how to clone a Git repository and run shell commands:
+
+pipeline {
+    agent any
+    stages {
+        stage('Clone Git Repository') {
+            steps {
+                git url: 'https://github.com/your-repo.git', branch: 'main'
+            }
+        }
+        stage('Run Shell Commands') {
+            steps {
+                script {
+                    sh '''
+                    echo "Running shell commands..."
+                    ls -la
+                    echo "Shell commands executed successfully!"
+                    '''
+                }
+            }
+        }
+    }
+}
+
+
+# Explanation:
+#Agent any: The pipeline can run on any available agent.
+
+#Stage: Clone Git Repository: This uses the git step to clone the specified repository and branch.
+
+#Stage: Run Shell Commands: The sh block runs multiple shell commands (e.g., listing files, or echoing a message).
+
+#Replace the Git URL (https://github.com/your-repo.git) and branch (main) with your repository details.
